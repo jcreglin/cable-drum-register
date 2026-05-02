@@ -1,27 +1,21 @@
 services:
   cable-drum:
-    image: node:20-alpine
-    working_dir: /app
-    volumes:
-      - ./:/app
-      - drum_data:/app/data
+    build: .
     ports:
       - "3040:3040"
+    volumes:
+      - drum_data:/app/data
     labels:
       - "traefik.enable=true"
-      # HTTPS
       - "traefik.http.routers.drums.rule=Host(`drums.astelecgroup.com.au`)"
       - "traefik.http.routers.drums.entrypoints=websecure"
       - "traefik.http.routers.drums.tls=true"
       - "traefik.http.routers.drums.tls.certresolver=letsencrypt"
-      # HTTP redirect to HTTPS
       - "traefik.http.routers.drums-http.rule=Host(`drums.astelecgroup.com.au`)"
       - "traefik.http.routers.drums-http.entrypoints=web"
       - "traefik.http.routers.drums-http.middlewares=drums-redirect"
       - "traefik.http.middlewares.drums-redirect.redirectscheme.scheme=https"
-      # Service
       - "traefik.http.services.drums.loadbalancer.server.port=3040"
-    command: sh -c "npm install --production && node server.js"
     restart: unless-stopped
 
 volumes:
