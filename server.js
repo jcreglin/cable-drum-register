@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 
 app.use(express.static(__dirname));
 
-const db = new Database('cabledrums.db');
+const db = new Database('/app/data/cabledrums.db');
 console.log('Database opened');
 
 // Create tables one by one
