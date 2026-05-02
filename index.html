@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cable Drum Register</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1600px; margin: 0 auto; }
+    h1 { color: #333; margin-bottom: 20px; }
+    .stats { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+    .stat { background: white; padding: 20px; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .stat h3 { font-size: 32px; color: #64748b; margin-bottom: 5px; }
+    .stat p { color: #666; font-size: 14px; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    button { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin: 2px; }
+    button:hover { background: #475569; }
+    button:hover { background: #1d4ed8; }
+    button.secondary { background: #64748b; }
+    button.danger { background: #dc2626; }
+    button.success { background: #16a34a; }
+    button.small { padding: 5px 10px; font-size: 12px; }
+    input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 6px; }
+    input[readonly] { background: #e9ecef; }
+    label { display: block; font-weight: 600; font-size: 12px; color: #555; margin-bottom: 2px; }
+    table { width: 100%; border-collapse: collapse; }
+    tbody tr:hover { background: #e8f4ff; }
+    tbody tr td:first-child { color: #64748b; font-weight: bold; text-decoration: underline; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+    th { background: #f8fafc; font-weight: 600; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
+    .modal.show { display: flex; }
+    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+    .form-section { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+    .form-section h3 { margin-bottom: 10px; color: #333; font-size: 14px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab { padding: 10px 20px; background: #e2e8f0; color: #64748b; border: none; border-radius: 6px; cursor: pointer; }
+    .tab.active { background: #64748b; color: white; font-weight: bold; }
+    .tab.active:hover { background: #475569; }
+    .filter-btn { padding: 8px 16px; background: #e2e8f0; color: #64748b; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+    .filter-btn.active { background: #64748b; color: white; }
+    .tab-content { display: none; }
+    .tab-content.show { display: block; }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .filters select, .filters input { width: auto; min-width: 150px; margin: 0; }
+    .login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #f5f5f5; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .login-screen h1 { font-size: 24px; margin-bottom: 30px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .hidden { display: none; }
+    .actions { display: flex; gap: 5px; }
+    .lookup-table { margin-bottom: 20px; }
+    .lookup-table table { font-size: 13px; }
+  #drumDetail { padding: 20px; background: #fff; min-height: 100vh; position: absolute; top: 0; left: 0; right: 0; z-index: 9999; }
+  #drumDetail.show { display: block; }
+  .drum-header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .drum-header-info { flex: 1; }
+    .drum-header-info h2 { margin: 0; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; background: #e2e8f0; font-size: 12px; font-weight: 600; }
+    .drum-header-stats { display: flex; gap: 30px; }
+    .stat-box { text-align: center; }
+    .stat-box label { display: block; font-size: 11px; color: #666; }
+    .stat-box span { font-size: 20px; font-weight: bold; color: #64748b; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .detail-group { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    .detail-group h3 { margin: 0 0 10px 0; color: #333; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+    .detail-group .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .detail-item { padding: 8px 0; }
+    .detail-item { padding: 10px; background: #f8fafc; border-radius: 6px; }
+    .detail-item label { display: block; font-size: 11px; color: #666; }
+    .detail-item span { font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div id="loginScreen" class="login-screen" style="padding-top:0;">
+    <div style="background:white;padding:40px;border-radius:12px;text-align:center;max-width:400px;width:90%;">
+    <img src="logo.jpg" style="height:100px;margin-bottom:15px;">
+    <h1 style="font-size:28px;margin-bottom:30px;">Cable Drum Register</h1>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p style="margin-top: 20px; color: #666; font-size: 14px;">Default: admin / admin123</p>
+    </div>
+  </div>
+
+  <div id="mainApp" class="container hidden">
+    <div style="max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:20px;background:#fff;border-bottom:1px solid #ddd;">
+      <div style="display:flex;align-items:center;gap:15px;">
+        <img src="logo.jpg" style="height:50px;">
+        <span style="font-weight:bold;font-size:24px;">Cable Drum Register</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:15px;">
+        <span id="userDisplay" style="color:#666;font-weight:500;text-align:right;line-height:1.3;"></span>
+        <button class="secondary" onclick="logout()">Logout</button>
+      </div>
+    </div>
+    
+    <div style="max-width:1600px;margin:0 auto;">
+    
+    <div class="stats" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #ddd;border-radius:8px;padding:15px 20px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:20px;">
+        <div><span style="font-size:12px;color:#888;">Total Drums</span><br><strong id="totalDrums" style="font-size:24px;">0</strong></div>
+        <div style="border-left:1px solid #eee;padding-left:20px;"><span style="font-size:12px;color:#888;">Active</span><br><strong id="activeDrums" style="font-size:24px;">0</strong></div>
+        <div style="border-left:1px solid #eee;padding-left:20px;"><span style="font-size:12px;color:#888;">Signed Out</span><br><strong id="signedDrums" style="font-size:24px;">0</strong></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <div><span style="font-size:12px;color:#888;">Total Value</span><br><strong id="totalValue" style="font-size:24px;">$0</strong></div>
+        <div style="border-left:1px solid #eee;padding-left:20px;"><span style="font-size:12px;color:#888;">Warehouses</span><br><strong id="totalWarehouses" style="font-size:24px;">0</strong></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('drums')">🥁 Drums</button>
+      <button class="tab" onclick="showTab('projects')">📋 Projects</button>
+      <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
+    </div>
+
+    <div id="drums" class="tab-content show">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="filters" style="margin-bottom:10px;">
+          <input type="text" id="search" placeholder="Search..." onchange="loadDrums()">
+          <button class="filter-btn active" onclick="setStatusFilter('Active', this)">Active</button>
+          <button class="filter-btn" onclick="setStatusFilter('Retired', this)">Archived</button>
+          <button class="filter-btn" onclick="setStatusFilter('', this)">All</button>
+          <button onclick="exportDrums()">📤 Export</button>
+          <button onclick="openModal()" style="margin-left:auto;">+ Add Drum</button>
+          <button onclick="openImportModal()" id="importBtn" style="display:none;">📥 Bulk Import</button>
+        </div>
+        <div class="filters">
+          <select id="filterClient" onchange="loadDrums()"><option value="">All Clients</option></select>
+          <select id="filterOwner" onchange="loadDrums()"><option value="">All Owners</option></select>
+          <select id="filterType" onchange="loadDrums()"><option value="">All Cable Types</option></select>
+          <select id="filterCount" onchange="loadDrums()"><option value="">All Cable Counts</option></select>
+          <select id="filterCategory" onchange="loadDrums()"><option value="">All Types</option></select>
+          <select id="filterSignStatus" onchange="loadDrums()"><option value="">All Sign Status</option><option value="Signed In">Signed In</option><option value="Signed Out">Signed Out</option></select>
+          <select id="filterWarehouse" onchange="loadDrums()"><option value="">All Warehouses</option></select>
+          <select id="filterProject" onchange="loadDrums()"><option value="">All Projects</option></select>
+          <button class="filter-btn active" onclick="clearFilters()" style="margin-left:10px;">Clear Filters</button>
+        </div>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="setSort('drum_number', this)" style="cursor:pointer;">Drum #</th>
+              <th>Sign</th>
+              <th onclick="setSort('client', this)" style="cursor:pointer;">Client</th>
+              <th onclick="setSort('drum_owner', this)" style="cursor:pointer;">Owner</th>
+              <th onclick="setSort('remaining_length', this)" style="cursor:pointer;">Remaining</th>
+              <th onclick="setSort('cable_type', this)" style="cursor:pointer;">Cable Type</th>
+              <th onclick="setSort('cable_count', this)" style="cursor:pointer;">Cable Count</th>
+              <th onclick="setSort('type', this)" style="cursor:pointer;">Type</th>
+              <th onclick="setSort('status', this)" style="cursor:pointer;">Status</th>
+              <th id="actionsHeader">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="drumsList"></tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+
+    <div id="projects" class="tab-content">
+      <div class="card">
+        <h2>Project Allocations</h2>
+        <div style="margin-bottom:20px;display:flex;gap:10px;align-items:center;">
+          <div>
+            <label>Select Project:</label>
+            <select id="projectSelect" onchange="loadProjectAllocations()" style="padding:8px;font-size:14px;border-radius:4px;border:1px solid #ccc;">
+              <option value="">-- Choose a project --</option>
+            </select>
+          </div>
+          <button onclick="exportProjectAllocations()" id="exportProjectBtn" style="margin-top:20px;padding:8px 15px;background:#51cf66;color:white;border:none;border-radius:4px;cursor:pointer;display:none;">📥 Export</button>
+        </div>
+        <div id="projectAllocationsTable" style="display:none;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f0f0f0;">
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Drum Number</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Cable Type</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Cable Count</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Used By</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Qty Used</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Qty Remaining</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Comments</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Project</th>
+                <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">Date</th>
+              </tr>
+            </thead>
+            <tbody id="projectAllocationsBody">
+            </tbody>
+          </table>
+        </div>
+        <div id="projectNoAllocations" style="display:none;padding:20px;text-align:center;color:#999;">
+          No allocations for this project.
+        </div>
+      </div>
+    </div>
+
+    <div id="settings" class="tab-content">
+      <div class="card">
+        <h2>Lookup Tables</h2>
+        <div class="tabs" style="margin-top:15px;">
+          <button class="tab active" onclick="showLookup('clients')">Clients</button>
+          <button class="tab" onclick="showLookup('drum_owners')">Drum Owners</button>
+          <button class="tab" onclick="showLookup('cable_types')">Cable Types</button>
+          <button class="tab" onclick="showLookup('cable_counts')">Cable Counts</button>
+          <button class="tab" onclick="showLookup('categories')">Categories</button>
+          <button class="tab" onclick="showLookup('sheath_colours')">Sheath Colours</button>
+          <button class="tab" onclick="showLookup('project-lookup')">Projects</button>
+          <button class="tab" onclick="showLookup('manufacturers')">Manufacturers</button>
+          <button class="tab" onclick="showLookup('warehouses')">Warehouses</button>
+          <button class="tab" onclick="showLookup('users')" id="usersTabBtn" style="display:none;">Users</button>
+        </div>
+        
+        <div id="lookupForm" style="margin: 15px 0;">
+          <input type="text" id="newLookupName" placeholder="New name">
+          <button class="success" onclick="addLookup()">+ Add</button>
+        </div>
+        
+        <!-- User status filters -->
+        <div id="userFilters" class="filters" style="display:none;">
+          <button class="filter-btn active" onclick="setUserFilter('active', this)">Active</button>
+          <button class="filter-btn" onclick="setUserFilter('inactive', this)">Inactive</button>
+          <button class="filter-btn" onclick="setUserFilter('', this)">All</button>
+        </div>
+        
+        <div id="lookupTables">
+          <div id="clients" class="lookup-table"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('clients', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('clients', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('clients', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Name</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+          <div id="drum_owners" class="lookup-table hidden"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('drum_owners', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('drum_owners', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('drum_owners', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Name</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+          <div id="cable_types" class="lookup-table hidden"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('cable_types', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('cable_types', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('cable_types', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Name</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+          <div id="cable_counts" class="lookup-table hidden"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('cable_counts', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('cable_counts', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('cable_counts', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Count</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+          <div id="categories" class="lookup-table hidden"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('categories', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('categories', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('categories', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Name</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+          <div id="sheath_colours" class="lookup-table hidden"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('sheath_colours', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('sheath_colours', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('sheath_colours', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Name</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+          <div id="project-lookup" class="lookup-table hidden"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('projects', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('projects', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('projects', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Name</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+          <div id="manufacturers" class="lookup-table hidden"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('manufacturers', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('manufacturers', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('manufacturers', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Name</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+          <div id="warehouses" class="lookup-table hidden"><div class="filters"><button class="filter-btn active" onclick="setLookupFilter('warehouses', 'active', this)">Active</button><button class="filter-btn" onclick="setLookupFilter('warehouses', 'archived', this)">Archived</button><button class="filter-btn" onclick="setLookupFilter('warehouses', 'all', this)">All</button></div><table style="width:100%;"><thead><tr><th style="width:80%;">Name</th><th style="width:20%;">Actions</th></tr></thead><tbody></tbody></table></div>
+        <div id="users" class="lookup-table hidden"><table><thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody id="usersList"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="drumModal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Add Drum</h2>
+      <div class="form-grid">
+        <div class="form-section">
+          <h3>General</h3>
+          <label>Drum Number *</label><input type="text" id="drum_number" placeholder="Drum Number">
+          <label>Client</label><select id="client"><option value="">Select Client</option></select>
+          <label>Drum Owner</label><select id="drum_owner"><option value="">Select Owner</option></select>
+          <label>Cable Type</label><select id="cable_type"><option value="">Select Cable Type</option></select>
+          <label>Cable Count</label><select id="cable_count"><option value="">Select Cable Count</option></select>
+          <label>Sheath Colour</label><select id="sheath_colour"><option value="">Select Sheath Colour</option></select>
+          <label>Category</label><select id="type"><option value="">Select Category</option></select>
+        </div>
+        <div class="form-section">
+          <h3>Readings</h3>
+          <label>Inner End Reading</label><input type="number" step="0.01" id="inner_end_reading" placeholder="Inner End Reading" onchange="calcRemainingLength()">
+          <label>Outer End Reading</label><input type="number" step="0.01" id="outer_end_reading" placeholder="Outer End Reading" onchange="calcRemainingLength()">
+          <label>Opening Entry Length (fixed on create)</label><input type="number" step="0.01" id="opening_entry_length" placeholder="Opening Entry Length" readonly>
+          <label>Remaining Length</label><input type="number" step="0.01" id="remaining_length" placeholder="Remaining Length" readonly>
+          <label>Price Per Meter</label><input type="number" step="0.01" id="price_per_meter" placeholder="Price Per Meter">
+          <label>Value On Hand</label><input type="number" step="0.01" id="value_on_hand" placeholder="Value On Hand">
+        </div>
+        <div class="form-section">
+          <h3>Sign In/Out</h3>
+          <label>Drum Status</label><select id="status"><option value="Active">Active</option><option value="Retired">Archived</option></select>
+          <label>Sign Status</label><select id="sign_status"><option value="Signed In">Signed In</option><option value="Signed Out">Signed Out</option></select>
+          <label>Sign Out To</label><input type="text" id="sign_out_to" placeholder="Sign Out To">
+          <label>Sign Out Date</label><input type="date" id="sign_out_date">
+          <label>Sign In Date</label><input type="date" id="sign_in_date">
+        </div>
+        <div class="form-section">
+          <h3>Details</h3>
+          <label>Project Allocation</label><select id="project_allocation"><option value="">Select Project</option></select>
+          <label>Project Drum Number</label><input type="text" id="project_drum_number" placeholder="Project Drum Number">
+          <label>Batch Number</label><input type="text" id="batch_number" placeholder="Batch Number">
+          <label>Manufacturer</label><select id="manufacturer"><option value="">Select Manufacturer</option></select>
+          <label>Manufacture Date</label><input type="date" id="manufacture_date">
+        </div>
+        <div class="form-section">
+          <h3>Audit</h3>
+          <label>Audit Date</label><input type="date" id="audit_date">
+          <label>Audit By</label><input type="text" id="audit_by" placeholder="Audit By">
+          <label>Status Reason</label><input type="text" id="status_reason" placeholder="Status Reason">
+        </div>
+        <div class="form-section">
+          <h3>Location</h3>
+          <label>Warehouse</label><select id="warehouse"><option value="">Select Warehouse</option></select>
+          <label>Warehouse Location</label><input type="text" id="warehouse_location" placeholder="Warehouse Location">
+          <label>Drum Photo</label><input type="file" id="drum_photo" accept="image/*">
+          <input type="hidden" id="drum_photo_url">
+          <div id="photo_preview" style="margin-top:5px;"></div>
+          <button type="button" class="danger small" onclick="clearDrumPhoto()" style="margin-top:5px;">Delete Image</button>
+        </div>
+        <div class="form-section">
+          <h3>Comments</h3>
+          <label>Comments</label><textarea id="comments" placeholder="Comments" rows="3"></textarea>
+        </div>
+      </div>
+      <button onclick="saveDrum()" class="success">Save</button>
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- User Management Modal -->
+  <div class="modal" id="userModal">
+    <div class="modal-content" style="max-width:400px;">
+      <h2 id="userModalTitle">Add User</h2>
+      <label>Username *</label><input type="text" id="user_username" placeholder="Username">
+      <label>Password *</label><input type="password" id="user_password" placeholder="Password">
+      <label>First Name</label><input type="text" id="user_first_name" placeholder="First Name">
+      <label>Last Name</label><input type="text" id="user_last_name" placeholder="Last Name">
+      <label>Email</label><input type="email" id="user_email" placeholder="Email Address">
+      <label>Role</label>
+      <select id="user_role" onchange="onUserRoleChange()">
+        <option value="admin">Admin - Full Access</option>
+        <option value="office">Office - No Delete</option>
+        <option value="user">User - View Only + Add Allocation</option>
+        <option value="client">Client - Limited View</option>
+      </select>
+      <div id="clientAccessSection" style="display:none;margin:15px 0;padding:15px;background:#f0f9ff;border-radius:8px;">
+        <h4 style="margin:0 0 10px 0;color:#333;">Client Access (for client role only)</h4>
+        <p style="margin:0 0 10px 0;font-size:12px;color:#666;">Select which clients and drum owners this user can view:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+          <div>
+            <label style="font-weight:600;">Allowed Clients:</label>
+            <div id="clientAccessCheckboxes" style="max-height:150px;overflow-y:auto;border:1px solid #ddd;padding:8px;border-radius:4px;background:white;"></div>
+          </div>
+          <div>
+            <label style="font-weight:600;">Allowed Drum Owners:</label>
+            <div id="ownerAccessCheckboxes" style="max-height:150px;overflow-y:auto;border:1px solid #ddd;padding:8px;border-radius:4px;background:white;"></div>
+          </div>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" id="user_active" style="width:auto;margin:0;"> Active
+      </label>
+      <button onclick="saveUser()" class="success">Save</button>
+      <button class="secondary" onclick="document.getElementById('userModal').classList.remove('show');">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal" id="importModal">
+    <div class="modal-content" style="max-width:700px;">
+      <h2>Bulk Import Drums</h2>
+      
+      <div id="importStep1">
+        <p style="color:#666;font-size:14px;margin-bottom:15px;">Upload a CSV file with drum data. Use the same format as the export.</p>
+        <label>CSV File</label>
+        <textarea id="importCsv" placeholder="Paste CSV data here or upload file..." style="min-height:200px;font-family:monospace;font-size:12px;"></textarea>
+        <div style="margin-top:15px;display:flex;gap:10px;">
+          <input type="file" id="importFile" accept=".csv" onchange="loadCsvFile()" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:4px;">
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+          <button onclick="previewImport()" class="success">Next: Preview</button>
+          <button class="secondary" onclick="document.getElementById('importModal').classList.remove('show');">Cancel</button>
+        </div>
+      </div>
+      
+      <div id="importStep2" style="display:none;">
+        <p style="color:#666;font-size:13px;margin-bottom:15px;">For each duplicate drum number, choose: Skip or Add as New</p>
+        <div id="importPreviewTable" style="max-height:300px;overflow-y:auto;border:1px solid #ddd;border-radius:4px;margin-bottom:15px;">
+          <!-- Preview table populated here -->
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+          <button class="secondary" onclick="importStep1Back()">Back</button>
+          <button onclick="confirmImport()" class="success">Import</button>
+        </div>
+      </div>
+      
+      <div id="importStep3" style="display:none;">
+        <h3>Import Results</h3>
+        <div id="importResultsContent"></div>
+        <div style="margin-top:20px;">
+          <button class="secondary" onclick="document.getElementById('importModal').classList.remove('show');">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Allocation Modal (inside drumDetail so it works when viewing a drum) -->
+  <div class="modal" id="allocationModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:10000; background:rgba(0,0,0,0.5);">
+    <div class="modal-content" style="max-width:500px;margin:auto;">
+      <h2 id="allocationModalTitle">Add Cable Allocation</h2>
+      <input type="hidden" id="allocationDrumId">
+      <label>Project Allocation</label><select id="allocation_project"><option value="">Select Project</option></select>
+      <label>Current Outer End Reading</label><input type="number" step="0.01" id="allocation_current_outer" readonly>
+      <label>Current Remaining Length</label><input type="number" step="0.01" id="allocation_current_remaining" readonly>
+      <label>New Outer End Reading</label><input type="number" step="0.01" id="allocation_new_outer" placeholder="New Outer End" onchange="calcAllocationRemaining()">
+      <label>New Remaining Length</label><input type="number" step="0.01" id="allocation_new_remaining" readonly>
+      <label>Qty Used (auto-calculated)</label><input type="number" step="0.01" id="allocation_qty" readonly>
+      <label>Used By</label><input type="text" id="allocation_used_by" placeholder="Used By">
+      <label>KP From</label><input type="number" step="0.01" id="allocation_kp_from" placeholder="KP From">
+      <label>KP To</label><input type="number" step="0.01" id="allocation_kp_to" placeholder="KP To">
+      <label>Comments</label><textarea id="allocation_comments" placeholder="Comments" rows="3"></textarea>
+      <button onclick="saveAllocation()" class="success">Save</button>
+      <button class="secondary" onclick="document.getElementById('allocationModal').style.display='none';">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Drum Detail View -->
+  <div id="drumDetail" style="display:none;">
+    <div class="drum-header">
+      <img src="logo.jpg" style="height:40px;">
+      <button class="secondary" onclick="showDrumList()">← Back</button>
+      <div class="drum-header-info">
+        <h2 id="detailDrumNumber">Drum No.</h2>
+        <span id="detailStatus" class="status-badge"></span>
+      </div>
+      <div class="drum-header-stats">
+        <div class="stat-box">
+          <label>Opening Entry Length</label>
+          <span id="detailOpeningLength">-</span>
+        </div>
+        <div class="stat-box">
+          <label>Created By</label>
+          <span id="detailCreatedBy">-</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="showDrumTab('general')">General</button>
+      <button class="tab" onclick="showDrumTab('allocations')">Cable Allocations</button>
+      <button class="tab" onclick="showDrumTab('readings')">Cable Readings</button>
+    </div>
+    
+    <div id="tab-general" class="tab-content show">
+      <div class="detail-grid" id="detailGeneral"></div>
+    </div>
+    
+    <div id="tab-allocations" class="tab-content">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+          <h3>Cable Allocations</h3>
+          <button onclick="window.allocationGoToAllocations = true; showAllocationForm(viewDrumId)">+ New Allocation</button>
+          <button onclick="exportAllocations()">📤 Export</button>
+        </div>
+        <table style="font-size:12px;">
+          <thead>
+            <tr><th>Cable Drum</th><th>Project Allocation</th><th>QTY Used</th><th>QTY Remaining</th><th>Used By</th><th>Comments</th><th>Created On</th><th>KP From</th><th>KP To</th></tr>
+          </thead>
+          <tbody id="allocationsList"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div id="tab-readings" class="tab-content">
+      <div class="card">
+        <h3>Cable Readings</h3>
+        <p>No readings recorded yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('cable_token');
+    let editingId = null;
+    // Ensure correct screen shows on load
+    if (token) {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+    } else {
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('mainApp').classList.add('hidden');
+    }
+    let currentLookup = 'clients';
+    
+    async function call(api, opts = {}) {
+      const r = await fetch(api, { ...opts, headers: { ...opts.headers, 'Authorization': token || '', 'Content-Type': 'application/json' } });
+      if (r.status === 401) { token = null; localStorage.removeItem('cable_token'); location.reload(); }
+      return r;
+    }
+
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      console.log('Login attempt:', username);
+      try {
+        const r = await fetch('/api/login', {
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        console.log('Response status:', r.status);
+        if (r.ok) {
+          const d = await r.json();
+          console.log('Login success:', d);
+          token = d.token;
+          localStorage.setItem('cable_token', token);
+          localStorage.setItem('cable_username', d.user?.username || '');
+          document.getElementById('loginScreen').classList.add('hidden');
+          document.getElementById('mainApp').classList.remove('hidden');
+          loadAll();
+        } else {
+          const e = await r.text();
+          console.log('Login error:', e);
+          alert('Invalid credentials');
+        }
+      } catch(e) {
+        console.log('Login exception:', e);
+        alert('Error: ' + e.message);
+      }
+    }
+
+    async function logout() {
+      await call('/api/logout', { method: 'POST' });
+      token = null; localStorage.removeItem('cable_token');
+      localStorage.removeItem('cable_username');
+      location.reload();
+    }
+
+    async function loadAll() {
+      document.querySelector('.filter-btn').classList.add('active');
+      await checkUserRole();
+      await loadStats();
+      await loadDrums();
+      await loadLookups();
+      loadLookupTable('clients', 'active');
+      await loadProjects();
+      // Display name is set by checkUserRole()
+    }
+
+    async function loadStats() {
+      try {
+        const response = await call('/api/stats');
+        console.log('Stats response status:', response.status);
+        const s = await response.json();
+        console.log('Stats data:', s);
+        document.getElementById('totalDrums').textContent = s.total || 0;
+        document.getElementById('activeDrums').textContent = s.active || 0;
+        document.getElementById('signedDrums').textContent = s.signed || 0;
+        document.getElementById('totalValue').textContent = '$' + (s.totalValue || 0).toLocaleString();
+        document.getElementById('totalWarehouses').textContent = s.warehouses || 0;
+      } catch(e) { console.error('Stats error:', e); }
+    }
+
+    let currentStatusFilter = 'Active';
+    
+    function setStatusFilter(status, btn) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadDrums();
+    }
+    
+    let currentSort = { column: 'drum_number', direction: 'ASC' };
+    
+    function clearFilters() {
+      document.getElementById('filterClient').value = '';
+      document.getElementById('filterOwner').value = '';
+      document.getElementById('filterSignStatus').value = '';
+      document.getElementById('filterWarehouse').value = '';
+      document.getElementById('filterProject').value = '';
+      document.getElementById('filterType').value = '';
+      document.getElementById('filterCount').value = '';
+      document.getElementById('filterCategory').value = '';
+      currentStatusFilter = '';
+      // Remove active from all filter buttons
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      // Set first status filter (All) as active
+      document.querySelector('.filter-btn').classList.add('active');
+      // Keep Clear Filters button active too
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        if (b.textContent === 'Clear Filters') b.classList.add('active');
+      });
+      currentSort = { column: 'drum_number', direction: 'ASC' };
+      // Reset header names
+      const headers = ['Drum #', 'Client', 'Owner', 'Remaining', 'Cable Type', 'Cable Count', 'Type', 'Status'];
+      document.querySelectorAll('th[onclick]').forEach((th, i) => th.textContent = headers[i]);
+      loadDrums();
+    }
+    
+    function setSort(column, thEl) {
+      if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'ASC' ? 'DESC' : 'ASC';
+      } else {
+        currentSort = { column, direction: 'ASC' };
+      }
+      // Reset all headers to plain text
+      const headers = ['Drum #', 'Client', 'Owner', 'Remaining', 'Cable Type', 'Cable Count', 'Type', 'Status'];
+      document.querySelectorAll('th[onclick]').forEach((th, i) => th.textContent = headers[i]);
+      // Add arrow to current sort column
+      const arrow = currentSort.direction === 'ASC' ? ' ↑' : ' ↓';
+      thEl.textContent += arrow;
+      loadDrums();
+    }
+    
+    async function loadDrums() {
+      const params = new URLSearchParams();
+      if (document.getElementById('filterClient').value) params.set('client', document.getElementById('filterClient').value);
+      if (document.getElementById('filterOwner').value) params.set('drum_owner', document.getElementById('filterOwner').value);
+      if (document.getElementById('filterType').value) params.set('cable_type', document.getElementById('filterType').value);
+      if (document.getElementById('filterCount').value) params.set('cable_count', document.getElementById('filterCount').value);
+      if (document.getElementById('filterCategory').value) params.set('type', document.getElementById('filterCategory').value);
+      if (document.getElementById('filterSignStatus').value) params.set('sign_status', document.getElementById('filterSignStatus').value);
+      if (document.getElementById('filterWarehouse').value) params.set('warehouse', document.getElementById('filterWarehouse').value);
+      if (document.getElementById('filterProject').value) params.set('project_allocation', document.getElementById('filterProject').value);
+      if (currentStatusFilter) params.set('status', currentStatusFilter);
+      if (document.getElementById('search').value) params.set('search', document.getElementById('search').value);
+      params.set('sort', currentSort.column);
+      params.set('order', currentSort.direction);
+      
+      const drums = await (await call('/api/drums?' + params)).json();
+      document.getElementById('drumsList').innerHTML = drums.map(d => `
+        <tr onclick="viewDrum(${d.id})" style="cursor:pointer;">
+          <td>${d.drum_number || '-'}</td>
+          <td onclick="event.stopPropagation()"><button class="small" style="background:${d.sign_status === 'Signed Out' ? '#ef4444' : '#22c55e'};color:${d.sign_status === 'Signed Out' ? '#fff' : '#fff'};" onclick="toggleSign(${d.id}, event)">${d.sign_status === 'Signed Out' ? 'Sign In' : 'Sign Out'}</button></td>
+          <td>${d.client || '-'}</td><td>${d.drum_owner || '-'}</td>
+          <td>${d.remaining_length || '-'}</td><td>${d.cable_type || '-'}</td><td>${d.cable_count || '-'}</td><td>${d.type || '-'}</td>
+          <td><span class="status-badge" style="background:${d.status === 'Active' ? '#dcfce7' : d.status === 'Retired' ? '#fee2e2' : '#e2e8f0'};">${d.status || '-'}</span></td>
+          ${currentUserRole !== 'user' ? '<td class="actions" onclick="event.stopPropagation()">' + (currentUserRole !== 'user' ? '<button class="small" onclick="editDrum(' + d.id + ')">Edit</button>' : '') + (currentUserRole === 'admin' ? '<button class="small danger" onclick="deleteDrum(' + d.id + ')">Del</button>' : '') + '</td>' : ''}
+        </tr>`).join('');
+    }
+
+    const lookupFilters = {}; // Store current filter for each table
+    
+    async function setLookupFilter(table, filter, btn) {
+      // Update active button
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      lookupFilters[table] = filter;
+      await loadLookupTable(table, filter);
+    }
+    
+    async function loadLookupTable(table, filter) {
+      const f = filter || lookupFilters[table] || 'active';
+      const data = await (await call('/api/' + table + '?filter=' + f)).json();
+      const nameField = table === 'cable_counts' ? 'name' : 'name';
+      // Map API table name to DOM element ID
+      const divId = table === 'projects' ? 'project-lookup' : table;
+      
+      document.querySelector('#' + divId + ' tbody').innerHTML = data.map(x =>
+        '<tr><td>' + (x.name || x.count || '-') + '</td><td>' + 
+        (currentUserRole === 'admin' ? '<button class="small danger" onclick="deleteLookup(\'' + table + '\', ' + x.id + ')">Del</button> ' : '') +
+        (currentUserRole !== 'user' ? '<button class="small" onclick="archiveLookup(\'' + table + '\', ' + x.id + ', ' + (x.archived ? 0 : 1) + ')">' + (x.archived ? 'Unarchive' : 'Archive') + '</button>' : '') +
+        '</td></tr>'
+      ).join('');
+    }
+    
+    async function archiveLookup(table, id, archived) {
+      try {
+        await call('/api/' + table + '/' + id, { method: 'PATCH', body: JSON.stringify({ archived }) });
+        loadLookupTable(apiTable, lookupFilters[apiTable] || 'active');
+        // Refresh form dropdowns to show/hide archived items
+        await loadLookups();
+      } catch(e) { alert('Error: ' + e.message); }
+    }
+    
+    async function loadLookups() {
+      const tables = ['clients', 'drum_owners', 'cable_types', 'cable_counts', 'categories', 'sheath_colours', 'projects', 'manufacturers', 'warehouses'];
+      const mapping = {
+        'clients': { filter: 'filterClient', form: 'client', label: 'Clients' },
+        'drum_owners': { filter: 'filterOwner', form: 'drum_owner', label: 'Owners' },
+        'cable_types': { filter: 'filterType', form: 'cable_type', label: 'Cable Types' },
+        'cable_counts': { filter: 'filterCount', form: 'cable_count', label: 'Cable Counts' },
+        'categories': { filter: 'filterCategory', form: 'type', label: 'Categories' },
+        'sheath_colours': { filter: null, form: 'sheath_colour', label: 'Sheath Colours' },
+        'projects': { filter: 'filterProject', form: 'project_allocation', label: 'Projects' },
+        'manufacturers': { filter: null, form: 'manufacturer', label: 'Manufacturers' },
+        'warehouses': { filter: 'filterWarehouse', form: 'warehouse', label: 'Warehouses' }
+      };
+      
+      // Load all lookups with active filter
+      for (const table of tables) {
+        await loadLookupTable(table, 'active');
+      }
+      
+      // Populate form dropdowns with unarchived items
+      for (const table of tables) {
+        const data = await (await call('/api/' + table + '?filter=all')).json();
+        const map = mapping[table];
+        if (!map) continue;
+        
+        // Populate filter dropdown
+        if (map.filter) {
+          const filterSelect = document.getElementById(map.filter);
+          if (filterSelect) {
+            filterSelect.innerHTML = '<option value="">All ' + map.label + '</option>' + 
+              data.map(x => `<option value="${x.name}">${x.name}</option>`).join('');
+          }
+        }
+        
+        // Populate form dropdown (only unarchived)
+        const formSelect = document.getElementById(map.form);
+        if (formSelect) {
+          formSelect.innerHTML = '<option value="">Select ' + map.label.replace(/s$/, '') + '</option>' + 
+            data.filter(x => !x.archived).map(x => `<option value="${x.name}">${x.name}</option>`).join('');
+        }
+      }
+    }
+
+    async function loadProjects() {
+      try {
+        const r = await call('/api/projects?filter=all');
+        const projects = await r.json();
+        const select = document.getElementById('projectSelect');
+        if (select) {
+          select.innerHTML = '<option value="">-- Choose a project --</option>' + 
+            projects.filter(p => !p.archived).map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+      } catch(e) {
+        console.error('Error loading projects:', e);
+      }
+    }
+
+    async function loadProjectAllocations() {
+      try {
+        const projectId = document.getElementById('projectSelect').value;
+        if (!projectId) {
+          document.getElementById('projectAllocationsTable').style.display = 'none';
+          document.getElementById('projectNoAllocations').style.display = 'none';
+          document.getElementById('exportProjectBtn').style.display = 'none';
+          return;
+        }
+        
+        const r = await call('/api/allocations?project_id=' + projectId);
+        const allocations = await r.json();
+        
+        const tbody = document.getElementById('projectAllocationsBody');
+        tbody.innerHTML = '';
+        
+        if (allocations.length === 0) {
+          document.getElementById('projectAllocationsTable').style.display = 'none';
+          document.getElementById('projectNoAllocations').style.display = 'block';
+          return;
+        }
+        
+        document.getElementById('projectAllocationsTable').style.display = 'table';
+        document.getElementById('projectNoAllocations').style.display = 'none';
+        document.getElementById('exportProjectBtn').style.display = 'inline-block';
+        
+        allocations.forEach(a => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid #eee';
+          tr.innerHTML = '<td style="padding:10px;">' + (a.drum_number || a.drum_id) + '</td>' +
+            '<td style="padding:10px;">' + (a.cable_type || '') + '</td>' +
+            '<td style="padding:10px;">' + (a.cable_count || '') + '</td>' +
+            '<td style="padding:10px;">' + (a.used_by || '') + '</td>' +
+            '<td style="padding:10px;text-align:right;">' + (a.qty_used || a.quantity || 0).toFixed(2) + '</td>' +
+            '<td style="padding:10px;text-align:right;">' + (a.qty_remaining || 0).toFixed(2) + '</td>' +
+            '<td style="padding:10px;">' + (a.comments || '') + '</td>' +
+            '<td style="padding:10px;">' + (a.project_allocation || '') + '</td>' +
+            '<td style="padding:10px;">' + (a.created_on ? a.created_on.substring(0, 19).replace('T', ' ') : '') + '</td>';
+          tbody.appendChild(tr);
+        });
+      } catch(e) {
+        console.error('Error loading allocations:', e);
+        alert('Error loading allocations: ' + e.message);
+      }
+    }
+
+    async function exportProjectAllocations() {
+      try {
+        const projectId = document.getElementById('projectSelect').value;
+        if (!projectId) {
+          alert('Please select a project');
+          return;
+        }
+        const projectName = document.getElementById('projectSelect').options[document.getElementById('projectSelect').selectedIndex].text;
+        const r = await call('/api/allocations/export?project_id=' + projectId);
+        if (!r.ok) throw new Error('Export failed');
+        const blob = await r.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'project_allocations_' + projectName.replace(/\s+/g, '_') + '.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Export failed: ' + e.message);
+      }
+    }
+
+    async function saveDrum() {
+      const data = {
+        drum_number: document.getElementById('drum_number').value,
+        client: document.getElementById('client').value,
+        drum_owner: document.getElementById('drum_owner').value,
+        cable_type: document.getElementById('cable_type').value,
+        cable_count: document.getElementById('cable_count').value || null,
+        sheath_colour: document.getElementById('sheath_colour').value,
+        type: document.getElementById('type').value,
+        inner_end_reading: parseFloat(document.getElementById('inner_end_reading').value) || null,
+        outer_end_reading: parseFloat(document.getElementById('outer_end_reading').value) || null,
+        opening_entry_length: parseFloat(document.getElementById('opening_entry_length').value) || null,
+        remaining_length: parseFloat(document.getElementById('remaining_length').value) || null,
+        price_per_meter: parseFloat(document.getElementById('price_per_meter').value) || null,
+        value_on_hand: parseFloat(document.getElementById('value_on_hand').value) || null,
+        status: document.getElementById('status').value,
+        sign_status: document.getElementById('sign_status').value,
+        sign_out_to: document.getElementById('sign_out_to').value,
+        sign_out_date: document.getElementById('sign_out_date').value,
+        sign_in_date: document.getElementById('sign_in_date').value,
+        project_allocation: document.getElementById('project_allocation').value,
+        project_drum_number: document.getElementById('project_drum_number').value,
+        batch_number: document.getElementById('batch_number').value,
+        manufacturer: document.getElementById('manufacturer').value,
+        manufacture_date: document.getElementById('manufacture_date').value,
+        audit_date: document.getElementById('audit_date').value,
+        audit_by: document.getElementById('audit_by').value,
+        status_reason: document.getElementById('status_reason').value,
+        warehouse: document.getElementById('warehouse').value,
+        warehouse_location: document.getElementById('warehouse_location').value,
+        drum_photo: document.getElementById('drum_photo_url').value,
+        comments: document.getElementById('comments').value
+      };
+      
+      try {
+        if (editingId) {
+          const r = await call('/api/drums/' + editingId, { method: 'PUT', body: JSON.stringify(data) });
+          if (!r.ok) { const e = await r.json(); alert('Error: ' + e.error); return; }
+        } else {
+          const r = await call('/api/drums', { method: 'POST', body: JSON.stringify(data) });
+          if (!r.ok) { const e = await r.json(); alert('Error: ' + e.error); return; }
+        }
+        closeModal(); loadAll();
+      } catch(e) { alert('Error: ' + e.message); }
+    }
+
+    async function deleteDrum(id) {
+      if (confirm('Delete this drum?')) { await call('/api/drums/'+id, { method: 'DELETE' }); loadDrums(); loadStats(); }
+    }
+
+    async function toggleSign(id, event) {
+      if (event) event.stopPropagation();
+      
+      // Check current status to show appropriate confirm
+      const drums = await (await call('/api/drums')).json();
+      const drum = drums.find(d => d.id === id);
+      if (drum && (drum.sign_status === 'Signed In' || !drum.sign_status)) {
+        if (!confirm('Are you sure you want to sign out this drum?')) return;
+        try {
+          const r = await call('/api/drums/' + id + '/toggle-sign', { method: 'POST' });
+          if (r.ok) {
+            loadDrums();
+          } else {
+            const e = await r.json();
+            alert('Error: ' + e.error);
+          }
+        } catch(e) { alert('Error: ' + e.message); }
+      } else {
+        // Signing in - set flag and show allocation form modal
+        window.signingInDrumId = id;
+        window.allocationGoToAllocations = false;
+        showAllocationForm(id);
+        setTimeout(() => {
+          document.getElementById('allocation_comments').value = 'Sign In';
+        }, 300);
+      }
+    }
+    
+    async function deleteDrumPhoto(id) {
+      if (!confirm('Delete this photo?')) return;
+      try {
+        const r = await call('/api/drums/' + id, { method: 'PUT', body: JSON.stringify({ drum_photo: null }) });
+        if (r.ok) {
+          viewDrum(id);
+        } else {
+          alert('Error deleting photo');
+        }
+      } catch(e) { alert('Error: ' + e.message); }
+    }
+    
+    function clearDrumPhoto() {
+      document.getElementById('drum_photo').value = '';
+      document.getElementById('drum_photo_url').value = '';
+      document.getElementById('photo_preview').innerHTML = '';
+    }
+
+    function openModal() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = 'Add Drum';
+      document.querySelectorAll('#drumModal input, #drumModal select, #drumModal textarea').forEach(el => el.value = '');
+      document.getElementById('drumModal').classList.add('show');
+    }
+
+    function calcRemainingLength() {
+      const inner = parseFloat(document.getElementById('inner_end_reading').value) || 0;
+      const outer = parseFloat(document.getElementById('outer_end_reading').value) || 0;
+      document.getElementById('remaining_length').value = Math.abs(outer - inner);
+    }
+
+    function closeModal() { document.getElementById('drumModal').classList.remove('show'); }
+    
+    // Handle drum photo file upload
+    document.getElementById('drum_photo').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('drum_photo_url').value = evt.target.result;
+        document.getElementById('photo_preview').innerHTML = '<img src="' + evt.target.result + '" style="max-width:100px;max-height:100px;">';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function editDrum(id) {
+      const drums = await (await call('/api/drums')).json();
+      const d = drums.find(x => x.id === id);
+      if (!d) return;
+      editingId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Drum';
+      document.getElementById('drum_number').value = d.drum_number || '';
+      document.getElementById('client').value = d.client || '';
+      document.getElementById('drum_owner').value = d.drum_owner || '';
+      document.getElementById('cable_type').value = d.cable_type || '';
+      document.getElementById('cable_count').value = d.cable_count || '';
+      document.getElementById('sheath_colour').value = d.sheath_colour || '';
+      document.getElementById('type').value = d.type || '';
+      document.getElementById('inner_end_reading').value = d.inner_end_reading || '';
+      document.getElementById('outer_end_reading').value = d.outer_end_reading || '';
+      document.getElementById('opening_entry_length').value = d.opening_entry_length || '';
+      document.getElementById('remaining_length').value = d.remaining_length || '';
+      document.getElementById('price_per_meter').value = d.price_per_meter || '';
+      document.getElementById('value_on_hand').value = d.value_on_hand || '';
+      document.getElementById('status').value = d.status || 'Active';
+      document.getElementById('sign_out_to').value = d.sign_out_to || '';
+      document.getElementById('sign_status').value = d.sign_status || 'Signed In';
+      document.getElementById('sign_out_date').value = d.sign_out_date || '';
+      document.getElementById('sign_in_date').value = d.sign_in_date || '';
+      document.getElementById('project_allocation').value = d.project_allocation || '';
+      document.getElementById('project_drum_number').value = d.project_drum_number || '';
+      document.getElementById('batch_number').value = d.batch_number || '';
+      document.getElementById('manufacturer').value = d.manufacturer || '';
+      document.getElementById('manufacture_date').value = d.manufacture_date || '';
+      document.getElementById('audit_date').value = d.audit_date || '';
+      document.getElementById('audit_by').value = d.audit_by || '';
+      document.getElementById('status_reason').value = d.status_reason || '';
+      document.getElementById('warehouse').value = d.warehouse || '';
+      document.getElementById('warehouse_location').value = d.warehouse_location || '';
+      document.getElementById('drum_photo_url').value = d.drum_photo || '';
+      document.getElementById('drum_photo').value = '';
+      document.getElementById('photo_preview').innerHTML = d.drum_photo ? '<img src="' + d.drum_photo + '" style="max-width:100px;max-height:100px;">' : '';
+      document.getElementById('comments').value = d.comments || '';
+      document.getElementById('drumModal').classList.add('show');
+    }
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('show'));
+      event.target.classList.add('active'); document.getElementById(tab).classList.add('show');
+      if (tab === 'drums') loadDrums();
+      if (tab === 'settings') {
+        const firstBtn = document.querySelector('#settings > .card > .tabs button');
+        if (firstBtn) {
+          firstBtn.classList.add('active');
+          document.querySelectorAll('.lookup-table').forEach(x => x.classList.add('hidden'));
+          document.getElementById('clients').classList.remove('hidden');
+          loadLookupTable('clients', 'active');
+        }
+      }
+    }
+
+    function showLookup(table) {
+      // Map display IDs to API table names
+      const apiTable = table === 'project-lookup' ? 'projects' : table;
+      currentLookup = apiTable;
+      document.querySelectorAll('#settings > .card > .tabs button').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.lookup-table').forEach(x => x.classList.add('hidden'));
+      // Highlight the button that matches this table
+      const allBtns = document.querySelectorAll('#settings > .card > .tabs button');
+      allBtns.forEach(b => {
+        const oc = b.getAttribute('onclick') || '';
+        if (oc.includes("'" + table + "'")) b.classList.add('active');
+      });
+      document.getElementById(table).classList.remove('hidden');
+      
+      // Show/hide add button based on table
+      const addBtn = document.querySelector('#lookupForm button');
+      const addInput = document.getElementById('newLookupName');
+      const userFilters = document.getElementById('userFilters');
+      if (table === 'users') {
+        addInput.style.display = 'none';
+        userFilters.style.display = 'flex';
+        if (addBtn) addBtn.textContent = '+ Add User';
+        addBtn.onclick = function() { openUserModal(); };
+        loadUsers();
+      } else {
+        addInput.style.display = 'block';
+        userFilters.style.display = 'none';
+        if (addBtn) { addBtn.textContent = '+ Add'; addBtn.onclick = function() { addLookup(); }; }
+      }
+    }
+
+    // Drum Detail View Functions
+    let currentDrumId = null;
+    
+function showDrumList() {
+      document.getElementById('drumDetail').style.display = 'none';
+      location.reload();
+    }
+    
+    async function viewDrum(id) {
+      // View drum
+      currentDrumId = id;
+      viewDrumId = id;
+      const drums = await (await call('/api/drums')).json();
+      // Drums loaded
+      const d = drums.find(x => x.id === id);
+      // Drum found
+      if (!d) { alert('Drum not found'); return; }
+      
+      const mainApp = document.getElementById('mainApp');
+      // Ensure mainApp is visible
+      mainApp.classList.remove('hidden');
+      mainApp.style.display = 'block';
+      
+      const detailDiv = document.getElementById('drumDetail');
+      // detailDiv found
+      detailDiv.style.display = 'block';
+      detailDiv.style.position = 'fixed';
+      detailDiv.style.top = '0';
+      detailDiv.style.left = '0';
+      detailDiv.style.width = '100%';
+      detailDiv.style.height = '100%';
+      detailDiv.style.zIndex = '9999';
+      detailDiv.style.background = '#f5f5f5';
+      detailDiv.style.overflowY = 'auto';
+      
+      document.getElementById('detailDrumNumber').textContent = 'Drum No. ' + (d.drum_number || '-');
+      document.getElementById('detailStatus').textContent = d.status || 'Active';
+      document.getElementById('detailOpeningLength').textContent = d.opening_entry_length || '-';
+      document.getElementById('detailCreatedBy').textContent = d.drum_owner || d.created_by || '-';
+      
+      // Set the drum detail content
+      
+      document.getElementById('detailGeneral').innerHTML = `
+        <div style="padding:20px; display:flex; flex-direction:column; gap:20px; max-width:1600px; margin:0 auto;">
+        <div style="display:flex; align-items:center; gap:15px; background:#fff; padding:15px 20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+          <button onclick="showDrumList()" style="width:fit-content;">← Back to List</button>
+          <div style="flex:1;"><strong style="font-size:18px;">Drum No. ${d.drum_number || '-'}</strong> <span class="status-badge">${d.status || 'Active'}</span></div>
+          ${d.drum_photo ? `<img src="${d.drum_photo}" style="max-width:80px;max-height:80px;border-radius:8px;border:1px solid #ddd;cursor:pointer;" onclick="window.open('${d.drum_photo}', '_blank')">` : ''}
+        </div>
+        
+        <div class="detail-grid">
+          <!-- Left Column -->
+          <div>
+            <div class="detail-group">
+              <h3>Cable Drum</h3>
+              <div class="detail-grid">
+                <div class="detail-item"><label>Drum Number</label><span>${d.drum_number || '-'}</span></div>
+                <div class="detail-item"><label>Client</label><span>${d.client || '-'}</span></div>
+                <div class="detail-item"><label>Drum Owner</label><span>${d.drum_owner || '-'}</span></div>
+                <div class="detail-item"><label>Cable Type</label><span>${d.cable_type || '-'}</span></div>
+                <div class="detail-item"><label>Cable Count</label><span>${d.cable_count || '-'}</span></div>
+                <div class="detail-item"><label>Sheath Colour</label><span>${d.sheath_colour || '-'}</span></div>
+                <div class="detail-item"><label>Type</label><span>${d.type || '-'}</span></div>
+              </div>
+            </div>
+            
+            <div class="detail-group">
+              <h3>Readings</h3>
+              <div class="detail-grid">
+                <div class="detail-item"><label>Inner End Reading</label><span>${d.inner_end_reading || '-'}</span></div>
+                <div class="detail-item"><label>Outer End Reading</label><span>${d.outer_end_reading || '-'}</span></div>
+                <div class="detail-item"><label>Opening Entry Length</label><span>${d.opening_entry_length || '-'}</span></div>
+                <div class="detail-item"><label>Remaining Length</label><span>${d.remaining_length || '-'}</span></div>
+                <div class="detail-item"><label>Price Per Meter</label><span>$${d.price_per_meter || '0.00'}</span></div>
+                <div class="detail-item"><label>Value On Hand</label><span>$${((parseFloat(d.remaining_length) || 0) * (parseFloat(d.price_per_meter) || 0)).toFixed(2)}</span></div>
+              </div>
+            </div>
+            
+            <div class="detail-group">
+              <h3>Audit</h3>
+              <div class="detail-grid">
+                <div class="detail-item"><label>Audit Date</label><span>${d.audit_date || '-'}</span></div>
+                <div class="detail-item"><label>Audit By</label><span>${d.audit_by || '-'}</span></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Column -->
+          <div>
+            <div class="detail-group">
+              <h3>Sign In/Out</h3>
+              <div class="detail-grid">
+                <div class="detail-item"><label>Status</label><span>${d.sign_status || 'Signed In'}</span></div>
+                <div class="detail-item"><label>Sign Out To</label><span>${d.sign_out_to || '-'}</span></div>
+                <div class="detail-item"><label>Sign Out Date</label><span>${d.sign_out_date || '-'}</span></div>
+                <div class="detail-item"><label>Sign In Date</label><span>${d.sign_in_date || '-'}</span></div>
+              </div>
+            </div>
+            
+            <div class="detail-group">
+              <h3>Status</h3>
+              <div class="detail-grid">
+                <div class="detail-item"><label>Project Allocation</label><span>${d.project_allocation || '-'}</span></div>
+                <div class="detail-item"><label>Project Drum Number</label><span>${d.project_drum_number || '-'}</span></div>
+                <div class="detail-item"><label>Batch Number</label><span>${d.batch_number || '-'}</span></div>
+                <div class="detail-item"><label>Manufacturer</label><span>${d.manufacturer || '-'}</span></div>
+                <div class="detail-item"><label>Manufacture Date</label><span>${d.manufacture_date || '-'}</span></div>
+                <div class="detail-item"><label>Status</label><span>${d.status || 'Active'}</span></div>
+                <div class="detail-item"><label>Status Reason</label><span>${d.status_reason || '-'}</span></div>
+                <div class="detail-item"><label>Created By</label><span>${d.created_by || '-'}</span></div>
+                <div class="detail-item"><label>Created On</label><span>${d.created_on || '-'}</span></div>
+              </div>
+            </div>
+            
+            <div class="detail-group">
+              <h3>Location</h3>
+              <div class="detail-grid">
+                <div class="detail-item"><label>Warehouse</label><span>${d.warehouse || '-'}</span></div>
+                <div class="detail-item"><label>Warehouse Location</label><span>${d.warehouse_location || '-'}</span></div>
+              </div>
+            </div>
+            
+
+            
+            <div class="detail-group">
+              <h3>Comments</h3>
+              <div style="background:#f8fafc;padding:10px;border-radius:6px;min-height:60px;">${d.comments || '-'}</div>
+            </div>
+          </div>
+        </div>
+        </div>
+      `;
+      
+      // Replace body
+      // Don't replace body - drumDetail is shown as overlay via position:fixed above
+      // Default to General tab
+      showDrumTab('general');
+      
+      // Initialize the general tab (allocations will load when tab is clicked)
+    }
+    
+    async function loadAllocations(drumId) {
+      try {
+        const r = await call('/api/drums/' + drumId + '/allocations');
+        if (!r.ok) return;
+        const alloc = await r.json();
+        const drums = await (await call('/api/drums')).json();
+        const d = drums.find(x => x.id === drumId);
+        const drumNum = d ? d.drum_number : '-';
+        const openingLength = parseFloat(d.opening_entry_length) || 0;
+        
+        // Current remaining from drum record (authoritative)
+        const currentRemaining = parseFloat(d.remaining_length) || 0;
+        
+        // Opening entry row
+        // Opening entry - use drum's created_on for date, created_by for user
+        // Parse date properly - treat as local Melbourne time
+        // Format Melbourne time - stored in Melbourne timezone
+        const openingDate = d.created_on ? (() => {
+          const [datePart, timePart] = d.created_on.split(' ');
+          if (!timePart) return d.created_on;
+          const [y, m, d2] = datePart.split('-');
+          const [H, min] = timePart.split(':');
+          return `${d2}/${m}/${y} ${H}:${min}`;
+        })() : '-';
+        const openingUser = d.created_by || '-';
+        const openingRow = `<tr style="background:#f0f9ff;"><td>${drumNum}</td><td>-</td><td>-</td><td>${openingLength.toFixed(2)}</td><td>${openingUser}</td><td>Opening Entry</td><td>${openingDate}</td><td>-</td><td>-</td></tr>`;
+        
+        // Show all allocations in order (sorted by id on server), using stored qty_remaining
+        const allocRows = alloc.filter(a => !a.comments || !a.comments.includes('Opening')).map(a => {
+          const dateStr = a.created_on ? (() => {
+            const parts = a.created_on.split(' ');
+            if (parts.length < 2) return a.created_on;
+            const [y, m, d2] = parts[0].split('-');
+            const [H, min] = parts[1].split(':');
+            return `${d2}/${m}/${y} ${H}:${min}`;
+          })() : '-';
+          const remaining = a.qty_remaining != null ? parseFloat(a.qty_remaining).toFixed(2) : '-';
+          return `<tr><td>${drumNum}</td><td>${a.project_allocation || '-'}</td><td>${a.qty_used || '-'}</td><td>${remaining}</td><td>${a.used_by || '-'}</td><td>${a.comments || '-'}</td><td>${dateStr}</td><td>${a.kp_from || '-'}</td><td>${a.kp_to || '-'}</td></tr>`;
+        }).join('');
+        
+        document.getElementById('allocationsList').innerHTML = openingRow + allocRows;
+      } catch(e) { console.error('Load allocations error:', e); }
+    }
+    
+    function showDrumTab(tab) {
+      const detail = document.getElementById('drumDetail');
+      // Hide all tab contents in drum detail
+      detail.querySelectorAll('.tab-content').forEach(c => c.classList.remove('show'));
+      // Remove active from drum detail tabs
+      detail.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      
+      if (tab === 'general') {
+        document.getElementById('tab-general').classList.add('show');
+        detail.querySelectorAll('.tab')[0]?.classList.add('active');
+      } else if (tab === 'allocations') {
+        document.getElementById('tab-allocations').classList.add('show');
+        detail.querySelectorAll('.tab')[1]?.classList.add('active');
+        if (currentDrumId) loadAllocations(currentDrumId);
+      } else if (tab === 'readings') {
+        document.getElementById('tab-readings').classList.add('show');
+        detail.querySelectorAll('.tab')[2]?.classList.add('active');
+      }
+    }
+    
+    let allocationDrumData = null;
+    
+    function showAllocationForm(drumId) {
+      currentDrumId = drumId || viewDrumId;
+      document.getElementById('allocationModalTitle').textContent = 'Add Cable Allocation';
+      document.getElementById('allocation_used_by').value = '';
+      document.getElementById('allocation_kp_from').value = '';
+      document.getElementById('allocation_kp_to').value = '';
+      document.getElementById('allocation_comments').value = '';
+      document.getElementById('allocation_qty').value = '';
+      document.getElementById('allocation_new_remaining').value = '';
+      
+      // Load the drum's current readings
+      call('/api/drums').then(r => r.json()).then(drums => {
+        const drum = drums.find(x => x.id === currentDrumId);
+        if (drum) {
+          allocationDrumData = drum;
+          document.getElementById('allocation_current_outer').value = drum.outer_end_reading || 0;
+          document.getElementById('allocation_current_remaining').value = drum.remaining_length || 0;
+          document.getElementById('allocation_new_outer').value = drum.outer_end_reading || 0;
+        }
+      });
+      
+      // Populate project dropdown
+      const projectSelect = document.getElementById('allocation_project');
+      projectSelect.innerHTML = '<option value="">Select Project</option>';
+      call('/api/projects').then(r => r.json()).then(data => {
+        if (data && data.length) {
+          projectSelect.innerHTML = '<option value="">Select Project</option>' + 
+            data.map(p => '<option value="' + p.name + '">' + p.name + '</option>').join('');
+        }
+      });
+      
+      document.getElementById('allocationModal').style.display = 'flex';
+    }
+    
+    function calcAllocationRemaining() {
+      const innerEnd = allocationDrumData ? (parseFloat(allocationDrumData.inner_end_reading) || 0) : 0;
+      const newOuter = parseFloat(document.getElementById('allocation_new_outer').value) || 0;
+      const newRemaining = Math.abs(newOuter - innerEnd);
+      const currentRemaining = parseFloat(document.getElementById('allocation_current_remaining').value) || 0;
+      const qtyUsed = currentRemaining - newRemaining;
+      
+      document.getElementById('allocation_new_remaining').value = newRemaining.toFixed(2);
+      document.getElementById('allocation_qty').value = qtyUsed > 0 ? qtyUsed.toFixed(2) : '0';
+    }
+    
+    async function saveAllocation() {
+      const qtyUsed = parseFloat(document.getElementById('allocation_qty').value) || 0;
+      const newRemaining = parseFloat(document.getElementById('allocation_new_remaining').value) || 0;
+      const currentRemaining = parseFloat(document.getElementById('allocation_current_remaining').value) || 0;
+      
+      // Check if remaining length has changed
+      if (qtyUsed <= 0 || newRemaining >= currentRemaining) {
+        alert('New outer end reading must result in a shorter remaining length. No allocation added.');
+        return;
+      }
+      
+      const data = {
+        project_allocation: document.getElementById('allocation_project').value,
+        qty_used: qtyUsed,
+        qty_remaining: newRemaining,
+        used_by: document.getElementById('allocation_used_by').value || null,
+        kp_from: parseFloat(document.getElementById('allocation_kp_from').value) || null,
+        kp_to: parseFloat(document.getElementById('allocation_kp_to').value) || null,
+        comments: document.getElementById('allocation_comments').value || null
+      };
+      
+      if (!data.project_allocation) { alert('Please select a project'); return; }
+      
+      try {
+        // Save the allocation
+        const r = await call('/api/drums/' + currentDrumId + '/allocations', {
+          method: 'POST',
+          body: JSON.stringify(data)
+        });
+        if (!r.ok) { const e = await r.json(); alert('Error: ' + e.error); return; }
+        
+        // Update the drum's readings
+        const newInner = allocationDrumData ? (parseFloat(allocationDrumData.inner_end_reading) || 0) : 0;
+        const newOuter = parseFloat(document.getElementById('allocation_new_outer').value) || 0;
+        await call('/api/drums/' + currentDrumId + '/readings', {
+          method: 'PATCH',
+          body: JSON.stringify({
+            inner_end_reading: newInner,
+            outer_end_reading: newOuter,
+            remaining_length: newRemaining
+          })
+        });
+        
+        document.getElementById('allocationModal').style.display = 'none';
+        
+        // If signing in via toggle button, update status
+        if (window.signingInDrumId) {
+          await call('/api/drums/' + window.signingInDrumId + '/toggle-sign', { method: 'POST' });
+          window.signingInDrumId = null;
+          loadDrums();
+          if (document.getElementById('drumDetailModal')) {
+          document.getElementById('drumDetailModal').style.display = 'none';
+        }
+          window.allocationGoToAllocations = false;
+        } else if (window.allocationGoToAllocations) {
+          // Refresh the drum detail view then show allocations tab
+          await viewDrum(currentDrumId);
+          showDrumTab('allocations');
+          window.allocationGoToAllocations = false;
+        } else {
+          // Just close and refresh drum list
+          await viewDrum(currentDrumId);
+        }
+      } catch(e) { alert('Error: ' + e.message); }
+    }
+    async function addLookup() {
+      const name = document.getElementById('newLookupName').value;
+      if (!name) return;
+      try {
+        const r = await call('/api/' + currentLookup, { method: 'POST', body: JSON.stringify({ name }) });
+        if (!r.ok) { const e = await r.json(); alert('Error: ' + e.error); return; }
+      } catch(e) { alert('Error: ' + e.message); return; }
+      document.getElementById('newLookupName').value = '';
+      loadLookups(); loadDrums();
+      loadLookupTable(currentLookup, 'active');
+      if (currentLookup === 'projects') loadProjects();
+    }
+
+    async function deleteLookup(table, id) {
+      if (confirm('Delete?')) { await call('/api/' + table + '/' + id, { method: 'DELETE' }); loadLookups(); loadDrums(); }
+    }
+
+    // User management
+    let currentUserRole = null;
+    let editingUserId = null;
+    let currentUserFilter = 'active';
+    
+    function setUserFilter(status, btn) {
+      currentUserFilter = status;
+      document.querySelectorAll('#userFilters .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadUsers();
+    }
+    
+    async function loadUsers() {
+      try {
+        console.log('Loading users with filter:', currentUserFilter);
+        const params = new URLSearchParams();
+        if (currentUserFilter) params.set('status', currentUserFilter);
+        const r = await call('/api/users?' + params);
+        console.log('Users response:', r.status);
+        if (!r.ok) { 
+          const e = await r.json();
+          console.log('Users error:', e);
+          document.getElementById('usersList').innerHTML = '<tr><td colspan="7">Error: ' + (e.error || 'Unknown') + '</td></tr>'; 
+          return; 
+        }
+        const users = await r.json();
+        console.log('Users loaded:', users.length);
+        document.getElementById('usersList').innerHTML = users.map(u => `
+          <tr>
+            <td>${u.username}</td>
+            <td>${u.first_name || '-'} ${u.last_name || '-'}</td>
+            <td>${u.email || '-'}</td>
+            <td><span class="status-badge">${u.role}</span></td>
+            <td><span class="status-badge" style="background:${u.active ? '#dcfce7' : '#fee2e2'};">${u.active ? 'Active' : 'Inactive'}</span></td>
+            <td>${u.created_on ? new Date(u.created_on).toLocaleDateString() : '-'}</td>
+            <td class="actions">
+              <button class="small" onclick="editUser(${u.id}, '${u.username}', '${u.role}', '${u.first_name || ''}', '${u.last_name || ''}', '${u.email || ''}', ${u.active})">Edit</button>
+              <button class="small danger" onclick="deleteUser(${u.id})">Delete</button>
+            </td>
+          </tr>`).join('');
+      } catch(e) { document.getElementById('usersList').innerHTML = '<tr><td colspan="6">Error: ' + e.message + '</td></tr>'; }
+    }
+    
+    function openUserModal(id = null, username = '', role = 'user', first_name = '', last_name = '', email = '', active = true) {
+      editingUserId = id;
+      document.getElementById('userModalTitle').textContent = id ? 'Edit User' : 'Add User';
+      document.getElementById('user_username').value = username || '';
+      document.getElementById('user_password').value = '';
+      document.getElementById('user_first_name').value = first_name || '';
+      document.getElementById('user_last_name').value = last_name || '';
+      document.getElementById('user_email').value = email || '';
+      document.getElementById('user_role').value = role || 'user';
+      document.getElementById('user_active').checked = active !== 0;
+      document.getElementById('userModal').classList.add('show');
+      
+      // Show/hide client access section based on role
+      const accessSection = document.getElementById('clientAccessSection');
+      if (role === 'client') {
+        accessSection.style.display = 'block';
+        loadClientAccessCheckboxes();
+      } else {
+        accessSection.style.display = 'none';
+      }
+    }
+    
+    function editUser(id, username, role, first_name, last_name, email, active) {
+      openUserModal(id, username, role, first_name, last_name, email, active);
+    }
+    
+    function onUserRoleChange() {
+      const role = document.getElementById('user_role').value;
+      const accessSection = document.getElementById('clientAccessSection');
+      if (role === 'client') {
+        accessSection.style.display = 'block';
+        loadClientAccessCheckboxes();
+      } else {
+        accessSection.style.display = 'none';
+      }
+    }
+    
+    async function loadClientAccessCheckboxes() {
+      // Load clients
+      const clientsResp = await call('/api/clients');
+      const clients = await clientsResp.json();
+      const clientContainer = document.getElementById('clientAccessCheckboxes');
+      clientContainer.innerHTML = clients.map(c => 
+        '<label style="display:block;margin:5px 0;font-weight:normal;">' +
+        '<input type="checkbox" class="client-access-checkbox" value="' + c.name + '" style="width:auto;margin:0 5px 0 0;">' + c.name + '</label>'
+      ).join('');
+      
+      // Load drum owners
+      const ownersResp = await call('/api/drum_owners');
+      const owners = await ownersResp.json();
+      const ownerContainer = document.getElementById('ownerAccessCheckboxes');
+      ownerContainer.innerHTML = owners.map(o => 
+        '<label style="display:block;margin:5px 0;font-weight:normal;">' +
+        '<input type="checkbox" class="owner-access-checkbox" value="' + o.name + '" style="width:auto;margin:0 5px 0 0;">' + o.name + '</label>'
+      ).join('');
+      
+      // Load existing access if editing
+      if (editingUserId) {
+        loadUserAccess(editingUserId);
+      }
+    }
+    
+    async function loadUserAccess(userId) {
+      try {
+        const resp = await call('/api/users/' + userId + '/access');
+        const access = await resp.json();
+        
+        // Check clients
+        document.querySelectorAll('.client-access-checkbox').forEach(cb => {
+          cb.checked = access.clients && access.clients.includes(cb.value);
+        });
+        
+        // Check owners
+        document.querySelectorAll('.owner-access-checkbox').forEach(cb => {
+          cb.checked = access.owners && access.owners.includes(cb.value);
+        });
+      } catch(e) {
+        console.error('Error loading user access:', e);
+      }
+    }
+    
+    async function saveUser() {
+      const username = document.getElementById('user_username').value;
+      const password = document.getElementById('user_password').value;
+      const first_name = document.getElementById('user_first_name').value;
+      const last_name = document.getElementById('user_last_name').value;
+      const email = document.getElementById('user_email').value;
+      const role = document.getElementById('user_role').value;
+      const active = document.getElementById('user_active').checked;
+      console.log('Saving user:', username, role, 'editing:', editingUserId, 'active:', active);
+      if (!username) { alert('Username required'); return; }
+      if (!editingUserId && !password) { alert('Password required for new users'); return; }
+      
+      try {
+        if (editingUserId) {
+          const r = await call('/api/users/' + editingUserId, { method: 'PUT', body: JSON.stringify({ username, password, role, first_name, last_name, email, active }) });
+          if (!r.ok) { const e = await r.json(); alert('Error: ' + e.error); return; }
+        } else {
+          const r = await call('/api/users', { method: 'POST', body: JSON.stringify({ username, password, role, first_name, last_name, email, active }) });
+          console.log('Create user response:', r.status);
+          if (!r.ok) { const e = await r.json(); alert('Error: ' + e.error); return; }
+        }
+        
+        // Save client access if role is client
+        if (role === 'client') {
+          const userId = editingUserId;
+          const selectedClients = Array.from(document.querySelectorAll('.client-access-checkbox:checked')).map(cb => cb.value);
+          const selectedOwners = Array.from(document.querySelectorAll('.owner-access-checkbox:checked')).map(cb => cb.value);
+          await call('/api/users/' + userId + '/access', { 
+            method: 'POST', 
+            body: JSON.stringify({ clients: selectedClients, owners: selectedOwners }) 
+          });
+        }
+        
+        document.getElementById('userModal').classList.remove('show');
+        loadUsers();
+      } catch(e) { alert('Error: ' + e.message); }
+    }
+    
+    async function deleteUser(id) {
+      if (confirm('Delete this user?')) {
+        try {
+          const r = await call('/api/users/' + id, { method: 'DELETE' });
+          if (!r.ok) { const e = await r.json(); alert('Error: ' + e.error); return; }
+          loadUsers();
+        } catch(e) { alert('Error: ' + e.message); }
+      }
+    }
+    
+    // Get current user role
+    async function checkUserRole() {
+      try {
+        const r = await call('/api/me');
+        if (r.ok) {
+          const d = await r.json();
+          if (d.user) {
+            currentUserRole = d.user.role;
+            // Set display name
+            const displayName = d.user.displayName || d.user.username;
+            document.getElementById('userDisplay').innerHTML = '<span style="font-size:11px;color:#999;">Logged in As:</span><br>' + displayName;
+            // Show Users tab and Import button only for admin
+            if (currentUserRole === 'admin') {
+              document.getElementById('usersTabBtn').style.display = 'inline-block';
+              document.getElementById('importBtn').style.display = 'inline-block';
+            }
+            // Apply role-based UI controls
+            applyRolePermissions();
+          }
+        }
+      } catch(e) {}
+    }
+    
+    function applyRolePermissions() {
+      const addDrumBtn = document.querySelector('#drums button[onclick="openModal()"]');
+      
+      // Settings tab
+      const settingsTab = document.querySelector('button[onclick="showTab(\'settings\')"]');
+      
+      const actionsHeader = document.getElementById('actionsHeader');
+      
+      if (currentUserRole === 'user') {
+        // User role: no edit, no delete, no settings, no add drum, no actions column
+        if (addDrumBtn) addDrumBtn.style.display = 'none';
+        if (settingsTab) settingsTab.style.display = 'none';
+        if (actionsHeader) actionsHeader.style.display = 'none';
+      } else if (currentUserRole === 'office') {
+        // Office role: can add/edit, no delete
+        if (addDrumBtn) addDrumBtn.style.display = 'inline-block';
+      } else {
+        // Admin: everything visible
+        if (addDrumBtn) addDrumBtn.style.display = 'inline-block';
+      }
+    }
+
+    async function exportDrums() {
+      try {
+        const r = await call('/api/drums/export');
+        if (!r.ok) throw new Error('Export failed');
+        const blob = await r.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'drums_export.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Export failed: ' + e.message);
+      }
+    }
+
+    async function exportAllocations() {
+      try {
+        const drumId = viewDrumId;
+        const url = drumId ? `/api/allocations/export?drum_id=${drumId}` : '/api/allocations/export';
+        const r = await call(url);
+        if (!r.ok) throw new Error('Export failed');
+        const blob = await r.blob();
+        const url2 = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url2;
+        const filename = drumId ? `drum_${drumId}_allocations.csv` : 'allocations_export.csv';
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url2);
+      } catch (e) {
+        alert('Export failed: ' + e.message);
+      }
+    }
+
+    let importPreviewData = null;
+    
+    function openImportModal() {
+      document.getElementById('importCsv').value = '';
+      document.getElementById('importStep1').style.display = 'block';
+      document.getElementById('importStep2').style.display = 'none';
+      document.getElementById('importStep3').style.display = 'none';
+      document.getElementById('importModal').classList.add('show');
+    }
+
+    function loadCsvFile() {
+      const file = document.getElementById('importFile').files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('importCsv').value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    async function previewImport() {
+      try {
+        const csv = document.getElementById('importCsv').value;
+        if (!csv.trim()) {
+          alert('Please enter or upload CSV data');
+          return;
+        }
+        const r = await call('/api/drums/import-preview', { method: 'POST', body: JSON.stringify({ csv }) });
+        const data = await r.json();
+        
+        if (!r.ok) {
+          alert('Preview failed: ' + data.error);
+          return;
+        }
+        
+        importPreviewData = data.preview;
+        renderPreviewTable();
+        document.getElementById('importStep1').style.display = 'none';
+        document.getElementById('importStep2').style.display = 'block';
+      } catch (e) {
+        alert('Preview error: ' + e.message);
+      }
+    }
+
+    function renderPreviewTable() {
+      const table = document.createElement('table');
+      table.style.width = '100%';
+      table.style.borderCollapse = 'collapse';
+      table.innerHTML = '<thead><tr style="background:#f0f0f0;"><th style="padding:8px;text-align:left;border-bottom:1px solid #ddd;width:50px;">Row</th><th style="padding:8px;text-align:left;border-bottom:1px solid #ddd;width:100px;">Drum</th><th style="padding:8px;text-align:left;border-bottom:1px solid #ddd;width:80px;">Status</th><th style="padding:8px;text-align:left;border-bottom:1px solid #ddd;flex:1;">Action</th></tr></thead><tbody></tbody>';
+      
+      const tbody = table.querySelector('tbody');
+      importPreviewData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #eee';
+        const statusColor = row.isDuplicate ? '#ff6b6b' : '#51cf66';
+        const statusText = row.isDuplicate ? 'Duplicate' : 'New';
+        tr.innerHTML = '<td style="padding:8px;">' + row.row + '</td><td style="padding:8px;">' + row.drum_number + '</td><td style="padding:8px;color:' + statusColor + ';font-weight:bold;">' + statusText + '</td><td style="padding:8px;">';
+        
+        if (row.isDuplicate) {
+          tr.innerHTML += '<div style="display:flex;gap:15px;align-items:center;"><label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="radio" name="action_' + row.row + '" value="skip" checked> Skip</label><label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="radio" name="action_' + row.row + '" value="addnew"> Add New</label></div>'
+        } else {
+          tr.innerHTML += 'Add';
+        }
+        tr.innerHTML += '</td>';
+        tbody.appendChild(tr);
+      });
+      
+      document.getElementById('importPreviewTable').innerHTML = '';
+      document.getElementById('importPreviewTable').appendChild(table);
+    }
+
+    function importStep1Back() {
+      document.getElementById('importStep1').style.display = 'block';
+      document.getElementById('importStep2').style.display = 'none';
+    }
+
+    async function confirmImport() {
+      try {
+        const rowActions = {};
+        importPreviewData.forEach(row => {
+          if (row.isDuplicate) {
+            const action = document.querySelector('input[name="action_' + row.row + '"]:checked');
+            rowActions[row.row] = action ? action.value : 'skip';
+          } else {
+            rowActions[row.row] = 'add';
+          }
+        });
+        
+        const csv = document.getElementById('importCsv').value;
+        const r = await call('/api/drums/import', { method: 'POST', body: JSON.stringify({ csv, rowActions }) });
+        const result = await r.json();
+        
+        if (r.ok) {
+          let content = 'Imported: ' + result.imported + ' drums';
+          if (result.duplicates && result.duplicates.length > 0) {
+            content += ' | Skipped: ' + result.duplicates.length;
+          }
+          if (result.errors && result.errors.length > 0) {
+            content += ' | Errors: ' + result.errors.length;
+            content += '<ul style="margin-top:10px;">';
+            result.errors.slice(0, 5).forEach(e => {
+              content += '<li>Row ' + e.row + ': ' + e.error + '</li>';
+            });
+            if (result.errors.length > 5) content += '<li>... and ' + (result.errors.length - 5) + ' more</li>';
+            content += '</ul>';
+          }
+          document.getElementById('importResultsContent').innerHTML = content;
+          document.getElementById('importStep2').style.display = 'none';
+          document.getElementById('importStep3').style.display = 'block';
+          
+          if (result.imported > 0) {
+            setTimeout(() => {
+              document.getElementById('importModal').classList.remove('show');
+              loadAll();
+            }, 2000);
+          }
+        } else {
+          alert('Import failed: ' + result.error);
+        }
+      } catch (e) {
+        alert('Import error: ' + e.message);
+      }
+    }
+
+    (async () => {
+      if (token) {
+        const r = await call('/api/me');
+        if (r.ok) {
+          const d = await r.json();
+          if (d.user) {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            if (d.user.role === 'admin') {
+              document.getElementById('importBtn').style.display = 'inline-block';
+            }
+            loadAll();
+            return;
+          }
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
