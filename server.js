@@ -422,6 +422,8 @@ app.get('/api/check-update', requireAuth, requireRole(['admin']), (req, res) => 
 
 // Self-update the running container from GitHub and restart the app
 app.post('/api/trigger-update', requireAuth, requireRole(['admin']), async (req, res) => {
+  const githubRepo = process.env.GITHUB_REPO || 'jcreglin/cable-drum-register';
+  console.log('trigger-update: using repo', githubRepo);
   try {
     const doBackup = req.query.backup === '1';
     const { spawn } = require('child_process');
